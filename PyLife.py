@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 #Conway's game of Life written in python. For more info, see the README
-
+#problem i tick kode ligger i de skraa til venstre
 
 import pygame
 from pygame.locals import *
@@ -16,12 +16,12 @@ SCREENSIZE=(1300,700)
 ALIVECOLOUR=(255,255,255)
 DEADCOLOUR=(0,0,0)
 DEADCOLOUR=BACKGROUNDCOLOUR=(17,20,70)
-TICKRATE=2
+TICKRATE=-1
 GOTHROUGH=0
 PrevTICKRATE=0
 #SET size of cells in pixels
 
-UNITSIZE=20
+UNITSIZE=2
 
 class unit(object):
     def __init__ (self, sizex, sizey=None ,screensize=SCREENSIZE):
@@ -53,130 +53,90 @@ class Tick(object):
         return alive
     def generate(self,seed, sizex,sizey):
         self.current = [[0]*sizey for i in range(sizex)]
-        self.previous=self.current
+        #self.previous=self.current[:][:]
         random.seed(seed)
         self.sizex=sizex
         self.sizey=sizey
-#        for x in range(sizex):
-#            for y in range(sizey):
-#                if (random.randint(0,10)==10):
-#                    self.current[x][y]=1
-#                else:
-#                    self.current[x][y]=0
+        for x in range(sizex):
+            for y in range(sizey):
+                if (random.randint(0,10)==10):
+                    self.current[x][y]=1
+                else:
+                    self.current[x][y]=0
     def nexttick(self):
-        #run with go-through borders
-        besidelist=[]
-        self.previous=self.current
+
+
+        #self.previous=self.current[:][:]
+        self.bufferlist = [[0]*self.sizey for i in range(self.sizex)]
         for x in range(self.sizex):
             for y in range(self.sizey):
-                besideCellsAlive=0
-                #if we run with go-through borders:
-                #if in end of array, loop around and check index 0
-                #else we asume cells outside of area is dead, and thus don't check
-                if x==self.sizex-1 and y==self.sizey-1:
-                    if self.previous[x-1][y]:
-                        besideCellsAlive+=1
-                    if self.previous[x-1][y-1]:
-                        besideCellsAlive+=1
-                    if self.previous[x][y-1]:
-                        besideCellsAlive+=1
-                    if GOTHROUGH:
-                        if self.previous[x-1][0]:
-                            besideCellsAlive+=1
-                        if self.previous[x][0]:
-                            besideCellsAlive+=1
-                        if self.previous[0][y]:
-                            besideCellsAlive+=1
-                        if self.previous[0][y-1]:
-                            besideCellsAlive+=1
-                        if self.previous[0][0]:
-                            besideCellsAlive+=1
-                    print(besideCellsAlive)
-                elif x==self.sizex-1:
-                    if self.previous[x-1][y]:
-                        besideCellsAlive+=1
-                    if self.previous[x-1][y-1]:
-                        besideCellsAlive+=1
-                    if self.previous[x-1][y+1]:
-                        besideCellsAlive+=1
-                    if self.previous[x][y-1]:
-                        besideCellsAlive+=1
-                    if self.previous[x][y+1]:
-                        besideCellsAlive+=1
-                    if GOTHROUGH:
-                        if self.previous[0][y]:
-                            besideCellsAlive+=1
-                        if self.previous[0][y-1]:
-                            besideCellsAlive+=1
-                        if self.previous[0][y+1]:
-                            besideCellsAlive+=1
-                elif y==self.sizey-1:
-                    if self.previous[x-1][y]:
-                        besideCellsAlive+=1
-                    if self.previous[x-1][y-1]:
-                        besideCellsAlive+=1
-                    if self.previous[x][y-1]:
-                        besideCellsAlive+=1
-                    if self.previous[x+1][y]:
-                        besideCellsAlive+=1
-                    if self.previous[x+1][y-1]:
-                        besideCellsAlive+=1
-                    if GOTHROUGH:
-                        if self.previous[x-1][0]:
-                            besideCellsAlive+=1
-                        if self.previous[x+1][0]:
-                            besideCellsAlive+=1
-                        if self.previous[x][0]:
-                            besideCellsAlive+=1
+                #if not self.previous[x][y]==0:
+                #    print (self.previous[x][y])
+                if not GOTHROUGH:
+                    #add to all neighbour cells if we are alive
+                    if self.current[x][y]:
+                        if not x==self.sizex-1:
+                            self.bufferlist[x+1][y]+=1
+                            if not y==self.sizey-1:
+                                self.bufferlist[x+1][y+1]+=1
+                            if not y==0:
+                                self.bufferlist[x+1][y-1]+=1
+                        if not x==0:
+                            self.bufferlist[x-1][y]+=1
+                            if not y==self.sizey-1:
+                                self.bufferlist[x-1][y+1]+=1
+                            if not y==0:
+                                self.bufferlist[x-1][y-1]+=1
+                        if not y==self.sizey-1:
+                            self.bufferlist[x][y+1]+=1
+                        if not y==0:
+                            self.bufferlist[x][y-1]+=1
                 else:
-                    if GOTHROUGH:
-                        if self.previous[x+1][y-1]:
-                            besideCellsAlive+=1
-                        if self.previous[x-1][y]:
-                            besideCellsAlive+=1
-                        if self.previous[x-1][y-1]:
-                            besideCellsAlive+=1
-                        if self.previous[x-1][y+1]:
-                            besideCellsAlive+=1
-                        if self.previous[x][y-1]:
-                            besideCellsAlive+=1
-                    else:
-                        if y:
-                            if self.previous[x][y-1]:
-                                besideCellsAlive+=1
-                            if self.previous[x+1][y-1]:
-                                besideCellsAlive+=1
-                        if x:
-                            if self.previous[x-1][y+1]:
-                                besideCellsAlive+=1
-                            if self.previous[x-1][y]:
-                                besideCellsAlive+=1
-                        if x and y:
-                            if self.previous[x-1][y-1]:
-                                besideCellsAlive+=1
-                    if self.previous[x][y+1]:
-                        besideCellsAlive+=1
-                    if self.previous[x+1][y]:
-                        besideCellsAlive+=1
-                    if self.previous[x+1][y+1]:
-                        print("debug")
-                        besideCellsAlive+=1
-                besidelist.append(besideCellsAlive)
-                if besideCellsAlive<2:
-                    self.current[x][y]=0
-                elif besideCellsAlive==3:
+                    #if GOTHROUGH
+                    if self.current[x][y]==1:
+                        self.bufferlist[x][y-1]+=1  
+                        self.bufferlist[x-1][y-1]+=1
+                        self.bufferlist[x-1][y]+=1
+                        if not y==self.sizey-1:
+                            self.bufferlist[x-1][y+1]+=1
+                            self.bufferlist[x][y+1]+=1
+                            if not x==self.sizex-1:
+                                self.bufferlist[x+1][y+1]+=1
+                            else:
+                                self.bufferlist[0][y+1]+=1
+                        else:
+                            self.bufferlist[x-1][0]+=1
+                            self.bufferlist[x][0]+=1
+                            if not x==self.sizex-1:
+                                self.bufferlist[x+1][0]+=1
+                            else:
+                                self.bufferlist[0][0]+=1
+                        if not x==self.sizex-1:
+                            self.bufferlist[x+1][y]+=1
+                            self.bufferlist[x+1][y-1]+=1
+                        else:
+                            self.bufferlist[0][y]+=1
+                            self.bufferlist[0][y-1]+=1
+                            
+        for x in range(self.sizex):
+            for y in range(self.sizey):
+                if self.bufferlist[x][y]==3:
                     self.current[x][y]=1
-                elif besideCellsAlive>3:
+                elif self.bufferlist[x][y]==2:
+                    self.current[x][y]=self.current[x][y]
+                elif self.bufferlist[x][y]<=1:
                     self.current[x][y]=0
-                elif besideCellsAlive==2 and self.current[x][y]==1:
-                    self.current[x][y]=1
-        for i in range(9):
-            print (str(i) +":" +str(besidelist.count(i)))
+                elif self.bufferlist[x][y]>=4:
+                    self.current[x][y]=0
+                #self.current[x][y]=self.previous[x][y]
+                
+                
+                        
     def changeCell(self,cords):
         #Get coordinates in grid by deviding with unit size and round down
         x=int(float(cords[0])/U.x)
         y=int(float(cords[1])/U.y)
-        self.current[x][y] = not game.current[x][y]
+        self.current[x][y] = not self.current[x][y]
 
 def DrawScreen():
     screen.fill(BACKGROUNDCOLOUR)
@@ -256,4 +216,4 @@ while 1:
 #        game.generate(time.gmtime(),U.gridsize[0],U.gridsize[1])
 #    print((1./tickingtime)*1000) #debug
 #    print(TICKRATE)
-#    print(int(game))              #debug
+    print(int(game))              #debug
