@@ -7,6 +7,7 @@ from pygame.locals import *
 import time
 import random
 from sys import exit
+import math
 
 #Set screensize
 SCREENSIZE=(1300,700)
@@ -17,7 +18,7 @@ DEADCOLOUR=(0,0,0)
 DEADCOLOUR=BACKGROUNDCOLOUR=(17,20,70)
 TICKRATE=2
 GOTHROUGH=0
-
+PrevTICKRATE=0
 #SET size of cells in pixels
 
 UNITSIZE=20
@@ -56,109 +57,111 @@ class Tick(object):
         random.seed(seed)
         self.sizex=sizex
         self.sizey=sizey
-        for x in range(sizex):
-            for y in range(sizey):
-                if (random.randint(0,10)==10):
-                    self.current[x][y]=1
-                else:
-                    self.current[x][y]=0
+#        for x in range(sizex):
+#            for y in range(sizey):
+#                if (random.randint(0,10)==10):
+#                    self.current[x][y]=1
+#                else:
+#                    self.current[x][y]=0
     def nexttick(self):
         #run with go-through borders
+        besidelist=[]
         self.previous=self.current
         for x in range(self.sizex):
             for y in range(self.sizey):
                 besideCellsAlive=0
                 #if we run with go-through borders:
                 #if in end of array, loop around and check index 0
-                #else we asume cells outside of area is dead, and thus don't check 
+                #else we asume cells outside of area is dead, and thus don't check
                 if x==self.sizex-1 and y==self.sizey-1:
                     if self.previous[x-1][y]:
                         besideCellsAlive+=1
-                    if self.previous[x-1][y-1]:   
+                    if self.previous[x-1][y-1]:
                         besideCellsAlive+=1
-                    if self.previous[x][y-1]:   
+                    if self.previous[x][y-1]:
                         besideCellsAlive+=1
                     if GOTHROUGH:
-                        if self.previous[x-1][0]:   
+                        if self.previous[x-1][0]:
                             besideCellsAlive+=1
-                        if self.previous[x][0]:   
+                        if self.previous[x][0]:
                             besideCellsAlive+=1
                         if self.previous[0][y]:
                             besideCellsAlive+=1
-                        if self.previous[0][y-1]:   
+                        if self.previous[0][y-1]:
                             besideCellsAlive+=1
-                        if self.previous[0][0]:   
+                        if self.previous[0][0]:
                             besideCellsAlive+=1
+                    print(besideCellsAlive)
                 elif x==self.sizex-1:
                     if self.previous[x-1][y]:
                         besideCellsAlive+=1
-                    if self.previous[x-1][y-1]:   
+                    if self.previous[x-1][y-1]:
                         besideCellsAlive+=1
-                    if self.previous[x-1][y+1]:   
+                    if self.previous[x-1][y+1]:
                         besideCellsAlive+=1
-                    if self.previous[x][y-1]:   
+                    if self.previous[x][y-1]:
                         besideCellsAlive+=1
-                    if self.previous[x][y+1]:   
+                    if self.previous[x][y+1]:
                         besideCellsAlive+=1
                     if GOTHROUGH:
                         if self.previous[0][y]:
                             besideCellsAlive+=1
-                        if self.previous[0][y-1]:   
+                        if self.previous[0][y-1]:
                             besideCellsAlive+=1
-                        if self.previous[0][y+1]:   
+                        if self.previous[0][y+1]:
                             besideCellsAlive+=1
                 elif y==self.sizey-1:
                     if self.previous[x-1][y]:
                         besideCellsAlive+=1
-                    if self.previous[x-1][y-1]:   
+                    if self.previous[x-1][y-1]:
                         besideCellsAlive+=1
-                    if self.previous[x][y-1]:   
+                    if self.previous[x][y-1]:
                         besideCellsAlive+=1
                     if self.previous[x+1][y]:
                         besideCellsAlive+=1
-                    if self.previous[x+1][y-1]:   
+                    if self.previous[x+1][y-1]:
                         besideCellsAlive+=1
                     if GOTHROUGH:
-                        if self.previous[x-1][0]:   
+                        if self.previous[x-1][0]:
                             besideCellsAlive+=1
-                        if self.previous[x+1][0]:   
+                        if self.previous[x+1][0]:
                             besideCellsAlive+=1
-                        if self.previous[x][0]:   
+                        if self.previous[x][0]:
                             besideCellsAlive+=1
                 else:
                     if GOTHROUGH:
-                        if self.previous[x+1][y-1]:   
+                        if self.previous[x+1][y-1]:
                             besideCellsAlive+=1
                         if self.previous[x-1][y]:
                             besideCellsAlive+=1
-                        if self.previous[x-1][y-1]:   
+                        if self.previous[x-1][y-1]:
                             besideCellsAlive+=1
-                        if self.previous[x-1][y+1]:   
+                        if self.previous[x-1][y+1]:
                             besideCellsAlive+=1
-                        if self.previous[x][y-1]:   
+                        if self.previous[x][y-1]:
                             besideCellsAlive+=1
                     else:
                         if y:
-                            if self.previous[x][y-1]:   
+                            if self.previous[x][y-1]:
                                 besideCellsAlive+=1
-                            if self.previous[x+1][y-1]:   
+                            if self.previous[x+1][y-1]:
                                 besideCellsAlive+=1
                         if x:
-                            if self.previous[x-1][y+1]:   
+                            if self.previous[x-1][y+1]:
                                 besideCellsAlive+=1
                             if self.previous[x-1][y]:
                                 besideCellsAlive+=1
                         if x and y:
-                            if self.previous[x-1][y-1]:   
+                            if self.previous[x-1][y-1]:
                                 besideCellsAlive+=1
-                            
-                            
-                    if self.previous[x][y+1]:   
+                    if self.previous[x][y+1]:
                         besideCellsAlive+=1
                     if self.previous[x+1][y]:
                         besideCellsAlive+=1
-                    if self.previous[x+1][y+1]:   
+                    if self.previous[x+1][y+1]:
+                        print("debug")
                         besideCellsAlive+=1
+                besidelist.append(besideCellsAlive)
                 if besideCellsAlive<2:
                     self.current[x][y]=0
                 elif besideCellsAlive==3:
@@ -167,6 +170,14 @@ class Tick(object):
                     self.current[x][y]=0
                 elif besideCellsAlive==2 and self.current[x][y]==1:
                     self.current[x][y]=1
+        for i in range(9):
+            print (str(i) +":" +str(besidelist.count(i)))
+    def changeCell(self,cords):
+        #Get coordinates in grid by deviding with unit size and round down
+        x=int(float(cords[0])/U.x)
+        y=int(float(cords[1])/U.y)
+        self.current[x][y] = not game.current[x][y]
+
 def DrawScreen():
     screen.fill(BACKGROUNDCOLOUR)
     for x in range (game.sizex):
@@ -176,9 +187,9 @@ def DrawScreen():
             elif not DEADCOLOUR==BACKGROUNDCOLOUR:
                pygame.draw.rect(screen,DEADCOLOUR,pygame.Rect((x*UNITSIZE,y*UNITSIZE),(UNITSIZE,UNITSIZE)))
     pygame.display.flip()
-    
-              
-    
+
+
+
 
 #initialize unit
 U=unit(UNITSIZE)
@@ -197,7 +208,7 @@ while 1:
     #generate next generation
     if not TICKRATE==0:
         game.nexttick()
-    
+
      #event loop for controls
     for event in pygame.event.get():
         if event.type==QUIT:
@@ -206,7 +217,7 @@ while 1:
             #Control speed on left and right
             if event.key==K_LEFT and TICKRATE>0:
                 TICKRATE-=1
-            if event.key==K_RIGHT and TICKRATE>0:
+            if event.key==K_RIGHT and TICKRATE>-1:
                 TICKRATE+=1
             #Pause on space (and unpause going back to previous value
             if event.key==K_SPACE:
@@ -224,7 +235,11 @@ while 1:
                 else:
                     TICKRATE=PrevTICKRATE
                     PrevTICKRATE=0
-    
+        #Mousecontrols
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button==1:
+                game.changeCell(event.pos)
+                DrawNext=1
 
 
     #Do not draw if board is paused. Except if forced by some event
@@ -236,8 +251,8 @@ while 1:
     else:
         #Only run with 10 loops per second if paused. Should be enough
         tickingtime=clock.tick(10)
-    
-#    if(int(game)>7000):               #debug 
+
+#    if(int(game)>7000):               #debug
 #        game.generate(time.gmtime(),U.gridsize[0],U.gridsize[1])
 #    print((1./tickingtime)*1000) #debug
 #    print(TICKRATE)
