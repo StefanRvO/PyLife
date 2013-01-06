@@ -14,11 +14,12 @@ SCREENSIZE=(1300,700)
 ALIVECOLOUR=(255,255,255)
 DEADCOLOUR=(0,0,0)
 BACKGROUNDCOLOUR=(0,0,0)
-TICKRATE=20
+TICKRATE=400
+GOTHROUGH=0
 
 #SET size of cells in pixels
 
-UNITSIZE=5
+UNITSIZE=20
 
 class unit(object):
     def __init__ (self, sizex, sizey=None ,screensize=SCREENSIZE):
@@ -66,24 +67,27 @@ class Tick(object):
         for x in range(self.sizex):
             for y in range(self.sizey):
                 besideCellsAlive=0
-            #if in end of array, loop around and check index 0
+                #if we run with go-through borders:
+                #if in end of array, loop around and check index 0
+                #else we asume cells outside of area is dead, and thus don't check 
                 if x==self.sizex-1 and y==self.sizey-1:
                     if self.previous[x-1][y]:
                         besideCellsAlive+=1
                     if self.previous[x-1][y-1]:   
                         besideCellsAlive+=1
-                    if self.previous[x-1][0]:   
-                        besideCellsAlive+=1
                     if self.previous[x][y-1]:   
                         besideCellsAlive+=1
-                    if self.previous[x][0]:   
-                        besideCellsAlive+=1
-                    if self.previous[0][y]:
-                        besideCellsAlive+=1
-                    if self.previous[0][y-1]:   
-                        besideCellsAlive+=1
-                    if self.previous[0][0]:   
-                        besideCellsAlive+=1
+                    if GOTHROUGH:
+                        if self.previous[x-1][0]:   
+                            besideCellsAlive+=1
+                        if self.previous[x][0]:   
+                            besideCellsAlive+=1
+                        if self.previous[0][y]:
+                            besideCellsAlive+=1
+                        if self.previous[0][y-1]:   
+                            besideCellsAlive+=1
+                        if self.previous[0][0]:   
+                            besideCellsAlive+=1
                 elif x==self.sizex-1:
                     if self.previous[x-1][y]:
                         besideCellsAlive+=1
@@ -95,43 +99,62 @@ class Tick(object):
                         besideCellsAlive+=1
                     if self.previous[x][y+1]:   
                         besideCellsAlive+=1
-                    if self.previous[0][y]:
-                        besideCellsAlive+=1
-                    if self.previous[0][y-1]:   
-                        besideCellsAlive+=1
-                    if self.previous[0][y+1]:   
-                        besideCellsAlive+=1
+                    if GOTHROUGH:
+                        if self.previous[0][y]:
+                            besideCellsAlive+=1
+                        if self.previous[0][y-1]:   
+                            besideCellsAlive+=1
+                        if self.previous[0][y+1]:   
+                            besideCellsAlive+=1
                 elif y==self.sizey-1:
                     if self.previous[x-1][y]:
                         besideCellsAlive+=1
                     if self.previous[x-1][y-1]:   
                         besideCellsAlive+=1
-                    if self.previous[x-1][0]:   
-                        besideCellsAlive+=1
                     if self.previous[x][y-1]:   
-                        besideCellsAlive+=1
-                    if self.previous[x][0]:   
                         besideCellsAlive+=1
                     if self.previous[x+1][y]:
                         besideCellsAlive+=1
                     if self.previous[x+1][y-1]:   
                         besideCellsAlive+=1
-                    if self.previous[x+1][0]:   
-                        besideCellsAlive+=1
+                    if GOTHROUGH:
+                        if self.previous[x-1][0]:   
+                            besideCellsAlive+=1
+                        if self.previous[x+1][0]:   
+                            besideCellsAlive+=1
+                        if self.previous[x][0]:   
+                            besideCellsAlive+=1
                 else:
-                    if self.previous[x-1][y]:
-                        besideCellsAlive+=1
-                    if self.previous[x-1][y-1]:   
-                        besideCellsAlive+=1
-                    if self.previous[x-1][y+1]:   
-                        besideCellsAlive+=1
-                    if self.previous[x][y-1]:   
-                        besideCellsAlive+=1
+                    if GOTHROUGH:
+                        if self.previous[x+1][y-1]:   
+                            besideCellsAlive+=1
+                        if self.previous[x-1][y]:
+                            besideCellsAlive+=1
+                        if self.previous[x-1][y-1]:   
+                            besideCellsAlive+=1
+                        if self.previous[x-1][y+1]:   
+                            besideCellsAlive+=1
+                        if self.previous[x][y-1]:   
+                            besideCellsAlive+=1
+                    else:
+                        if y:
+                            if self.previous[x][y-1]:   
+                                besideCellsAlive+=1
+                            if self.previous[x+1][y-1]:   
+                                besideCellsAlive+=1
+                        if x:
+                            if self.previous[x-1][y+1]:   
+                                besideCellsAlive+=1
+                            if self.previous[x-1][y]:
+                                besideCellsAlive+=1
+                        if x and y:
+                            if self.previous[x-1][y-1]:   
+                                besideCellsAlive+=1
+                            
+                            
                     if self.previous[x][y+1]:   
                         besideCellsAlive+=1
                     if self.previous[x+1][y]:
-                        besideCellsAlive+=1
-                    if self.previous[x+1][y-1]:   
                         besideCellsAlive+=1
                     if self.previous[x+1][y+1]:   
                         besideCellsAlive+=1
@@ -161,7 +184,11 @@ game.generate(time.gmtime(),U.gridsize[0],U.gridsize[1])
 while 1:
     #generate next generation
     game.nexttick()
-    #draw the shit
+    
+    
+    #test time to draw
+
+        #draw the shit
     screen.fill(BACKGROUNDCOLOUR)
     for x in range (game.sizex):
         for y in range(game.sizey):
@@ -173,5 +200,5 @@ while 1:
     tickingtime=clock.tick(TICKRATE)
 #    if(int(game)>7000):               #debug 
 #        game.generate(time.gmtime(),U.gridsize[0],U.gridsize[1])
-#    print((1./tickingtime)*1000) #debug
+    print((1./tickingtime)*1000) #debug
 #    print(int(game))              #debug
