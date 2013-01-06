@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 #Conway's game of Life written in python. For more info, see the README
 
+
 import pygame
 from pygame.locals import *
 import time
@@ -13,8 +14,8 @@ SCREENSIZE=(1300,700)
 #Set colour of the cells
 ALIVECOLOUR=(255,255,255)
 DEADCOLOUR=(0,0,0)
-BACKGROUNDCOLOUR=(0,0,0)
-TICKRATE=400
+DEADCOLOUR=BACKGROUNDCOLOUR=(17,20,70)
+TICKRATE=2
 GOTHROUGH=0
 
 #SET size of cells in pixels
@@ -166,6 +167,17 @@ class Tick(object):
                     self.current[x][y]=0
                 elif besideCellsAlive==2 and self.current[x][y]==1:
                     self.current[x][y]=1
+def DrawScreen():
+    screen.fill(BACKGROUNDCOLOUR)
+    for x in range (game.sizex):
+        for y in range(game.sizey):
+            if game.current[x][y]:
+                pygame.draw.rect(screen,ALIVECOLOUR,pygame.Rect((x*UNITSIZE,y*UNITSIZE),(UNITSIZE,UNITSIZE)))
+            elif not DEADCOLOUR==BACKGROUNDCOLOUR:
+               pygame.draw.rect(screen,DEADCOLOUR,pygame.Rect((x*UNITSIZE,y*UNITSIZE),(UNITSIZE,UNITSIZE)))
+    pygame.display.flip()
+    
+              
     
 
 #initialize unit
@@ -183,22 +195,50 @@ game.generate(time.gmtime(),U.gridsize[0],U.gridsize[1])
 #Gameloop
 while 1:
     #generate next generation
-    game.nexttick()
+    if not TICKRATE==0:
+        game.nexttick()
     
+     #event loop for controls
+    for event in pygame.event.get():
+        if event.type==QUIT:
+            exit()
+        elif event.type==KEYDOWN:
+            #Control speed on left and right
+            if event.key==K_LEFT and TICKRATE>0:
+                TICKRATE-=1
+            if event.key==K_RIGHT and TICKRATE>0:
+                TICKRATE+=1
+            #Pause on space (and unpause going back to previous value
+            if event.key==K_SPACE:
+                if not TICKRATE==0:
+                    PrevTICKRATE=TICKRATE
+                    TICKRATE=0
+                else:
+                    TICKRATE=PrevTICKRATE
+                    PrevTICKRATE=0
+                #Run at max speed if shift is pressed
+            if event.key==K_RSHIFT:
+                if not TICKRATE==-1:
+                    PrevTICKRATE=TICKRATE
+                    TICKRATE=-1
+                else:
+                    TICKRATE=PrevTICKRATE
+                    PrevTICKRATE=0
     
-    #test time to draw
 
-        #draw the shit
-    screen.fill(BACKGROUNDCOLOUR)
-    for x in range (game.sizex):
-        for y in range(game.sizey):
-            if game.current[x][y]:
-                pygame.draw.rect(screen,ALIVECOLOUR,pygame.Rect((x*UNITSIZE,y*UNITSIZE),(UNITSIZE,UNITSIZE)))
-            elif not DEADCOLOUR==BACKGROUNDCOLOUR:
-                pygame.draw.rect(screen,DEADCOLOUR,pygame.Rect((x*UNITSIZE,y*UNITSIZE),(UNITSIZE,UNITSIZE)))
-    pygame.display.flip()
-    tickingtime=clock.tick(TICKRATE)
+
+    #Do not draw if board is paused. Except if forced by some event
+    if not TICKRATE==0 or DrawNext==1:
+        DrawScreen()
+        DrawNext=0
+    if not TICKRATE==0:
+        tickingtime=clock.tick(TICKRATE)
+    else:
+        #Only run with 10 loops per second if paused. Should be enough
+        tickingtime=clock.tick(10)
+    
 #    if(int(game)>7000):               #debug 
 #        game.generate(time.gmtime(),U.gridsize[0],U.gridsize[1])
-    print((1./tickingtime)*1000) #debug
+#    print((1./tickingtime)*1000) #debug
+#    print(TICKRATE)
 #    print(int(game))              #debug
