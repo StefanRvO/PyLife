@@ -8,6 +8,7 @@ import random
 from sys import exit
 import math
 import inputbox
+BLOCKSIZE=(25,25)
 
 #Set screensize
 SCREENSIZE=(1300,700)
@@ -67,6 +68,9 @@ class Tick(object):
                     self.current[x][y]=1
                 else:
                     self.current[x][y]=0
+        #Now we have generated the board. Now we split it up to split it up to improve performance
+        #We split in blocks of 25x25 (however we do some magic so all the fields will fit in blocks, so all blocks is not __excactly__ 25x25
+        
     def nexttick(self):
         self.generation+=1
         pygame.display.set_caption("Seed="+str(gameseed)+", Generation="+str(self.generation)+", Gridsize= ("+ str(U.gridsize[0])+" x "+str(U.gridsize[1])+")")
@@ -225,7 +229,7 @@ while 1:
                 Changed=0
 
                 
-                
+        #test        
         #Mousecontrols
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button==1:

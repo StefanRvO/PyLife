@@ -20,6 +20,8 @@ let the user modyfy an already running board. //done
 
 zoom in and out.
 
+Optimisation:
+Cut board up in small sections. Only check a section if the section itself or a field around it has changed since last tick
 
 
 
