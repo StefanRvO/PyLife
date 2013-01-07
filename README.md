@@ -11,23 +11,24 @@ Rules in game of life:
 
 The Feature goals of the program is:
 
-Choose weather we want a closed system with dead cells around the board, or if we want a run-through-edge system.
-Be able to speed up, slow down, pause and run the game frame-by frame.
-Be able to enter a seed to generate the board from.
-start the board from random, show seed.
-start an empty board and let the user place cells
-let the user modyfy an already running board.
+Choose wether we want a closed system with dead cells around the board, or if we want a run-through-edge system. //done
+Be able to speed up, slow down, pause and run the game frame-by frame. //done
+Be able to enter a seed to generate the board from. 
+start the board from random, show seed.     //done
+start an empty board and let the user place cells //done (press down to empty board)
+let the user modyfy an already running board. //done
+
 zoom in and out.
 
 
 
 
 #This software is released as Free and Open Source Software under the Beerware license.
-/*
- * ----------------------------------------------------------------------------
- * "THE BEER-WARE LICENSE" (Revision 42):
- * <stefan@stefanrvo.dk> wrote this file. As long as you retain this notice you
- * can do whatever you want with this stuff. If we meet some day, and you think
- * this stuff is worth it, you can buy me a beer in return.
- * ----------------------------------------------------------------------------
- */
+
+  ----------------------------------------------------------------------------
+  "THE BEER-WARE LICENSE" (Revision 42):
+  <stefan@stefanrvo.dk> wrote this file. As long as you retain this notice you
+  can do whatever you want with this stuff. If we meet some day, and you think
+  this stuff is worth it, you can buy me a beer in return.
+  ----------------------------------------------------------------------------
+ 

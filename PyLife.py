@@ -1,6 +1,5 @@
 #!/usr/bin/python2
 #Conway's game of Life written in python. For more info, see the README
-#problem i tick kode ligger i de skraa til venstre
 
 import pygame
 from pygame.locals import *
@@ -8,6 +7,7 @@ import time
 import random
 from sys import exit
 import math
+import inputbox
 
 #Set screensize
 SCREENSIZE=(1300,700)
@@ -16,12 +16,13 @@ SCREENSIZE=(1300,700)
 ALIVECOLOUR=(255,255,255)
 DEADCOLOUR=(0,0,0)
 DEADCOLOUR=BACKGROUNDCOLOUR=(17,20,70)
-TICKRATE=-1
-GOTHROUGH=0
+TICKRATE=5
+GOTHROUGH=1
 PrevTICKRATE=0
+Changed=0
 #SET size of cells in pixels
 
-UNITSIZE=2
+UNITSIZE=5
 
 class unit(object):
     def __init__ (self, sizex, sizey=None ,screensize=SCREENSIZE):
@@ -35,6 +36,8 @@ class unit(object):
         return str(self.x)+"*"+str(self.y)
 
 class Tick(object):
+    def __init__(self):
+        self.generation=0
     def __str__ (self):
         alive=0
         #if we try to print this, give number of alive cells
@@ -52,6 +55,7 @@ class Tick(object):
                     alive+=1
         return alive
     def generate(self,seed, sizex,sizey):
+        self.generation=0
         self.current = [[0]*sizey for i in range(sizex)]
         #self.previous=self.current[:][:]
         random.seed(seed)
@@ -64,9 +68,10 @@ class Tick(object):
                 else:
                     self.current[x][y]=0
     def nexttick(self):
+        self.generation+=1
+        pygame.display.set_caption("Seed="+str(gameseed)+", Generation="+str(self.generation)+", Gridsize= ("+ str(U.gridsize[0])+" x "+str(U.gridsize[1])+")")
 
 
-        #self.previous=self.current[:][:]
         self.bufferlist = [[0]*self.sizey for i in range(self.sizex)]
         for x in range(self.sizex):
             for y in range(self.sizey):
@@ -128,7 +133,7 @@ class Tick(object):
                     self.current[x][y]=0
                 elif self.bufferlist[x][y]>=4:
                     self.current[x][y]=0
-                #self.current[x][y]=self.previous[x][y]
+
                 
                 
                         
@@ -161,13 +166,16 @@ screen=pygame.display.set_mode((U.gridsize[0]*U.x,(U.gridsize[1])*U.y),0,32)
 clock=pygame.time.Clock()
 
 #generate initial state
-game.generate(time.gmtime(),U.gridsize[0],U.gridsize[1])
+gameseed=random.randint(0,time.mktime(time.gmtime()))   #this seed is hopefully suficiently random
+
+game.generate(gameseed,U.gridsize[0],U.gridsize[1])
 
 #Gameloop
 while 1:
     #generate next generation
     if not TICKRATE==0:
         game.nexttick()
+        DrawNext=1
 
      #event loop for controls
     for event in pygame.event.get():
@@ -195,11 +203,37 @@ while 1:
                 else:
                     TICKRATE=PrevTICKRATE
                     PrevTICKRATE=0
+            if event.key==K_w:
+                GOTHROUGH=not GOTHROUGH
+            if event.key==K_f:
+                game.nexttick()
+                DrawNext=1
+            if event.key==K_UP:
+                gameseed=random.randint(0,time.mktime(time.gmtime()))
+                game.generate(gameseed,U.gridsize[0],U.gridsize[1])
+                Changed=0
+                DrawNext=1
+            if event.key==K_DOWN:
+                game.current = [[0]*game.sizey for i in range(game.sizex)]
+                gameseed="BLANK"
+                game.generation=0
+                DrawNext=1
+            if event.key==K_s:
+                gameseed = inputbox.ask(screen, "Enter a seed to start from")
+                game.generate(gameseed,U.gridsize[0],U.gridsize[1])
+                DrawNext=1
+                Changed=0
+
+                
+                
         #Mousecontrols
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button==1:
                 game.changeCell(event.pos)
                 DrawNext=1
+                if not Changed:
+                    gameseed="Board Changed. Original seed was: "+str(gameseed)+" Changed at generation "+str(game.generation)
+                    Changed=1
 
 
     #Do not draw if board is paused. Except if forced by some event
@@ -209,11 +243,10 @@ while 1:
     if not TICKRATE==0:
         tickingtime=clock.tick(TICKRATE)
     else:
-        #Only run with 10 loops per second if paused. Should be enough
-        tickingtime=clock.tick(10)
+        tickingtime=clock.tick(10) #Only run with 10 loops per second if paused. Should be enough
 
 #    if(int(game)>7000):               #debug
 #        game.generate(time.gmtime(),U.gridsize[0],U.gridsize[1])
 #    print((1./tickingtime)*1000) #debug
 #    print(TICKRATE)
-    print(int(game))              #debug
+#    print(int(game))              #debug
