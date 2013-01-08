@@ -23,7 +23,7 @@ PrevTICKRATE=0
 Changed=0
 #SET size of cells in pixels
 
-UNITSIZE=5
+UNITSIZE=50
 
 class unit(object):
     def __init__ (self, sizex, sizey=None ,screensize=SCREENSIZE):
@@ -69,7 +69,37 @@ class Tick(object):
                 else:
                     self.current[x][y]=0
         #Now we have generated the board. Now we split it up to split it up to improve performance
-        #We split in blocks of 25x25 (however we do some magic so all the fields will fit in blocks, so all blocks is not __excactly__ 25x25
+        #We split in blocks of 25x25 (however we do some magic so all the cells will fit in blocks, so all blocks is not __excactly__ 25x25
+        counter=[0,0]
+        self.blocklist=[[[[1]*(BLOCKSIZE[1]) for i in range(BLOCKSIZE[0])] for ii in range (sizey/BLOCKSIZE[1]+1)] for iii in range(sizex/BLOCKSIZE[0]+1)] # We unfortunally need a 4D list for this.. not pretty
+        for i in range(sizex/BLOCKSIZE[0]+1): #Run as many times as neccesary on x asix
+            #print("running..lvl 1")
+            for l in range(sizey/BLOCKSIZE[1]+1): #Run as many times as neccesary on y asix
+                #print("running..lvl 2")
+                if not i==sizex/BLOCKSIZE[0]:   #Check if we are in the last run, which can have different blocksize
+                    for x in range(BLOCKSIZE[0]):
+                        #print("running..lvl 3")
+                        if not l==sizey/BLOCKSIZE[1]: #Check if we are are in the last run, which can have different blocksize
+                            for y in range(BLOCKSIZE[1]):
+                                #print("running..lvl 4")
+                                self.blocklist[i][l][x][y]=self.current[BLOCKSIZE[0]*i+x][BLOCKSIZE[1]*l+y]
+                        else:
+                            for y in range(self.sizey%BLOCKSIZE[1]):
+                                    #print("running..lvl 4..else")
+                                    self.blocklist[i][l][x][y]=self.current[BLOCKSIZE[0]*i+x][BLOCKSIZE[1]*l+y]
+                else:
+                    for x in range(self.sizex%BLOCKSIZE[0]):
+                        #print("running..lvl 3..else")
+                        if not l==sizey/BLOCKSIZE[1]: #Check if we are are in the last run, which can have different blocksize
+                            for y in range(BLOCKSIZE[1]):
+                                #print("running..lvl3..elselvl4")
+                                self.blocklist[i][l][x][y]=self.current[BLOCKSIZE[0]*i+x][BLOCKSIZE[1]*l+y]
+                        else:
+                            for y in range(self.sizey%BLOCKSIZE[1]):
+                                #print("running..lvl3..elselvl4..else")
+                                self.blocklist[i][l][x][y]=self.current[BLOCKSIZE[0]*i+x][BLOCKSIZE[1]*l+y]                    
+                                
+                
         
     def nexttick(self):
         self.generation+=1
@@ -178,7 +208,7 @@ game.generate(gameseed,U.gridsize[0],U.gridsize[1])
 while 1:
     #generate next generation
     if not TICKRATE==0:
-        game.nexttick()
+        #game.nexttick()
         DrawNext=1
 
      #event loop for controls
@@ -228,8 +258,7 @@ while 1:
                 DrawNext=1
                 Changed=0
 
-                
-        #test        
+       
         #Mousecontrols
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button==1:
